@@ -12,8 +12,8 @@ namespace Bulky.Web.Controllers
         {
             _logger = logger;
         }
-
-        public IActionResult Index()
+        //IActionResult ActionResult Logger Dapper
+        public ActionResult Index()
         {
             return View();
         }
