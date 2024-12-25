@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace Bulky.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    //[Authorize(Roles = SD.Role_Admin)]
+
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -135,7 +137,7 @@ namespace Bulky.Web.Areas.Admin.Controllers
 
             _unitOfWork.Product.Remove(productToBeDelete);
             _unitOfWork.Save();
-            return Json(new { success = false, message = "Error While deleting" });
+            return Json(new { success = true, message = "Product Deleted successfully" });
 
         }
 
