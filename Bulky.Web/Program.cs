@@ -26,12 +26,12 @@ namespace Bulky.Web
 
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
-            //builder.Services.ConfigureApplicationCookie(options =>
-            //{
-            //    options.LoginPath = $"/Identity/Account/Login";
-            //    options.LogoutPath = $"/Identity/Account/Logout";
-            //    options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
-            //});
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
 
 
             builder.Services.AddRazorPages();
@@ -50,11 +50,13 @@ namespace Bulky.Web
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
+
+
             app.MapStaticAssets();
             app.MapRazorPages();
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}")
