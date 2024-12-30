@@ -44,6 +44,7 @@ namespace Bulky.Models
 
         public String ImageUrl { get; set; }
 
-
+        //[ValidateNever]
+        //public List<ProductImage> ProductImages { get; set; }
     }
 }

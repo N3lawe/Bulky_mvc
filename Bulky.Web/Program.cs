@@ -1,10 +1,12 @@
 using Bulky.DataAccess.Data;
+using Bulky.DataAccess.DbInitializer;
 using Bulky.DataAccess.Repository;
 using Bulky.DataAccess.Repository.IRepository;
 using Bulky.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 namespace Bulky.Web
 {
@@ -22,6 +24,7 @@ namespace Bulky.Web
             options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
+            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 
 
@@ -33,6 +36,28 @@ namespace Bulky.Web
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
 
+            builder.Services.AddAuthentication().AddFacebook(option =>
+            {
+                option.AppId = "457011653926844";
+                option.AppSecret = "1139cdb380da42151a31f3eea3b346f8";
+            });
+
+
+            //builder.Services.AddAuthentication().AddMicrosoftAccount(option =>
+            //{
+            //    option.ClientId = "ec4d380d-d631-465d-b473-1e26ee706331";
+            //    option.ClientSecret = "qMW8Q~LlEEZST~SDxDgcEVx_45LJQF2cQ_rEKcSQ";
+            //});
+
+
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(100);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -49,11 +74,16 @@ namespace Bulky.Web
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
+            StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseSession();
 
-
+            SeedDatabase();
             app.MapStaticAssets();
             app.MapRazorPages();
 
@@ -63,6 +93,16 @@ namespace Bulky.Web
                 .WithStaticAssets();
 
             app.Run();
+
+
+            void SeedDatabase()
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                    dbInitializer.Initialize();
+                }
+            }
         }
     }
 }
